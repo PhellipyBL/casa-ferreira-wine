@@ -1,0 +1,21 @@
+# Netlify
+.netlify/
+
+# Backups e previews locais
+images/_old/
+_preview/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / IDE
+.vscode/
+.idea/
+.claude/
+*.swp
+
+# Node (caso adicione dependências futuras)
+node_modules/
+package-lock.json

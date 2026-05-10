@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://casaferreirawine.com.br/sitemap.xml
