@@ -1043,6 +1043,23 @@ button { cursor: pointer; background: none; border: none; font: inherit; }
   color: rgba(255,255,255,.3);
   letter-spacing: .06em;
 }
+.footer__security {
+  flex-basis: 100%;
+  text-align: center;
+  margin-top: .8rem;
+  padding-top: .8rem;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.footer__security small {
+  font-size: .68rem;
+  color: rgba(255,255,255,.45);
+  letter-spacing: .04em;
+  line-height: 1.6;
+}
+.footer__security strong {
+  color: rgba(255,255,255,.65);
+  font-weight: 500;
+}
 
 /* ===========================
    WHATSAPP FLUTUANTE

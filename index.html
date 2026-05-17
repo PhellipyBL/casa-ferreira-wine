@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#3D0F0F" />
+
+  <!-- Content Security Policy: limita origens permitidas pra script/style/fonte/imagem.
+       Bloqueia injeção de script externo malicioso e clickjacking básico (object/base). -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com https://www.facebook.com; connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://connect.facebook.net; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+
   <title>Casa Ferreira Wine, Enoturismo em Bananeiras, PB</title>
   <meta name="description" content="Enoturismo, gastronomia e história real em Bananeiras, Paraíba. Tardes em três atos: a Casa, o terroir e a Varanda Marqueza. Vagas limitadas." />
   <link rel="canonical" href="https://casaferreirawine.com.br/" />
@@ -522,6 +528,7 @@
       <div class="container">
         <p>&copy; 2026 Casa Ferreira Wine, Todos os direitos reservados</p>
         <p>Bananeiras · Paraíba · Brasil</p>
+        <p class="footer__security"><small>Reservas oficiais apenas por <strong>casaferreirawine.com.br</strong> ou WhatsApp <strong>+55 83 92153-5737</strong>. Desconfie de qualquer outro canal.</small></p>
       </div>
     </div>
   </footer>
