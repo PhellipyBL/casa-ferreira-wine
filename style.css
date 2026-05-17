@@ -1459,28 +1459,28 @@ button { cursor: pointer; background: none; border: none; font: inherit; }
   justify-content: space-between;
   gap: 1rem;
   padding: 1.4rem 1.8rem;
-  background: transparent;
-  border: 1px solid rgba(60, 15, 15, .18);
+  background: var(--wine-dark, #3D0F0F);
+  border: 1px solid var(--wine-dark, #3D0F0F);
   border-radius: 2px;
   font-family: var(--font-sans, 'Montserrat', sans-serif);
   font-size: .78rem;
   font-weight: 600;
   letter-spacing: .15em;
   text-transform: uppercase;
-  color: var(--wine-dark, #3D0F0F);
-  transition: background .2s, border-color .2s;
+  color: var(--cream, #F7F3EC);
+  transition: background .2s, border-color .2s, color .2s;
 }
 .faq-toggle__trigger::-webkit-details-marker { display: none; }
 .faq-toggle__trigger::marker { content: ''; }
 .faq-toggle__trigger:hover {
-  background: rgba(60, 15, 15, .04);
+  background: var(--wine, #5C1A1A);
   border-color: var(--gold, #B8965A);
 }
 .faq-toggle__chevron {
   width: 12px;
   height: 12px;
-  border-right: 2px solid var(--gold, #B8965A);
-  border-bottom: 2px solid var(--gold, #B8965A);
+  border-right: 2px solid var(--gold-light, #D4B07A);
+  border-bottom: 2px solid var(--gold-light, #D4B07A);
   transform: rotate(45deg);
   transition: transform .3s;
   margin-bottom: 4px;
@@ -1488,10 +1488,6 @@ button { cursor: pointer; background: none; border: none; font: inherit; }
 .faq-toggle[open] .faq-toggle__chevron {
   transform: rotate(-135deg);
   margin-bottom: -4px;
-}
-.faq-toggle[open] .faq-toggle__trigger {
-  border-color: var(--gold, #B8965A);
-  background: rgba(60, 15, 15, .04);
 }
 .faq-toggle__content {
   padding: 2rem 0 1rem;
