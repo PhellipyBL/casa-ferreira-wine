@@ -500,13 +500,16 @@
   <!-- FAQ -->
   <section class="faq-home" id="faq">
     <div class="container">
-      <div class="faq-home__header" data-aos>
-        <span class="label">Dúvidas Frequentes</span>
-        <h2 class="section-title">Perguntas <em>Frequentes</em></h2>
-        <p class="section-desc">Tudo o que você precisa saber antes de viver a tarde Casa Ferreira.</p>
-      </div>
+      <details class="faq-toggle" data-aos>
+        <summary class="faq-toggle__trigger">
+          <span class="faq-toggle__label">Dúvidas Frequentes</span>
+          <span class="faq-toggle__chevron" aria-hidden="true"></span>
+        </summary>
 
-      <div class="faq-home__list" data-aos>
+        <div class="faq-toggle__content">
+          <p class="faq-toggle__intro">Tudo o que você precisa saber antes de viver a tarde Casa Ferreira.</p>
+
+          <div class="faq-home__list">
 
         <details class="faq-item">
           <summary class="faq-question">O que é a Casa Ferreira?</summary>
@@ -639,7 +642,9 @@
           </div>
         </details>
 
-      </div>
+          </div>
+        </div>
+      </details>
     </div>
   </section>
 
