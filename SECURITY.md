@@ -11,7 +11,7 @@ Se você identificou uma vulnerabilidade no site **casaferreirawine.com.br** ou 
 - Assunto: `[SEGURANÇA] Resumo curto da vulnerabilidade`
 
 **Canal alternativo (WhatsApp):**
-- +55 83 92153-5737
+- [WhatsApp oficial](https://wa.me/5583921535737)
 - Mencione "reporte de segurança" na primeira mensagem
 
 ## O que incluir no reporte
