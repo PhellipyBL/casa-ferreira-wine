@@ -1,0 +1,6 @@
+Contact: mailto:contato@casaferreirawine.com.br
+Contact: https://wa.me/5583921535737
+Expires: 2027-05-17T00:00:00.000Z
+Preferred-Languages: pt-BR, en, es
+Canonical: https://casaferreirawine.com.br/.well-known/security.txt
+Policy: https://github.com/PhellipyBL/casa-ferreira-wine/blob/main/SECURITY.md
