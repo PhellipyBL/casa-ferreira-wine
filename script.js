@@ -89,15 +89,10 @@ function loadGA4(id) {
   gtag('config', id, { send_page_view: true });
 }
 
-function loadMetaPixel(id) {
-  if (!id || id.startsWith('0000')) return;
-  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
-  document,'script','https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init', id);
-  fbq('track', 'PageView');
+// Meta Pixel já carregou no <head> em modo 'revoke' (queue pausada).
+// Aqui só damos grant/revoke após consent — Consent API oficial do Meta.
+function grantMetaConsent() {
+  if (typeof fbq === 'function') fbq('consent', 'grant');
 }
 
 function applyConsent(state) {
@@ -105,14 +100,14 @@ function applyConsent(state) {
   if (banner) banner.hidden = true;
   if (state === 'accepted') {
     loadGA4(cfg.gaId);
-    loadMetaPixel(cfg.fbqId);
+    grantMetaConsent();
   }
 }
 
 const stored = localStorage.getItem(LGPD_KEY);
 if (stored === 'accepted') {
   loadGA4(cfg.gaId);
-  loadMetaPixel(cfg.fbqId);
+  grantMetaConsent();
 } else if (stored !== 'rejected' && banner) {
   banner.hidden = false;
 }
