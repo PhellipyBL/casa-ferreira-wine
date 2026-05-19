@@ -148,6 +148,15 @@ document.querySelectorAll('a[href*="smilein.com.br"]').forEach(a => {
       location: a.closest('section,nav,footer')?.tagName?.toLowerCase() || 'unknown',
       label: a.textContent.trim()
     });
+    // Meta Pixel — InitiateCheckout (visitante saindo pra ticketeria)
+    if (typeof fbq === 'function') {
+      fbq('track', 'InitiateCheckout', {
+        content_name: 'Casa Ferreira Wine - Experiencia',
+        content_category: 'enoturismo',
+        value: 398,
+        currency: 'BRL'
+      });
+    }
   });
 });
 
@@ -157,6 +166,13 @@ document.querySelectorAll('a[href*="wa.me"]').forEach(a => {
     trackEvent('whatsapp_click', {
       location: a.closest('section,nav,footer,a.whatsapp-float')?.className || 'whatsapp-float'
     });
+    // Meta Pixel — Lead (contato via WhatsApp)
+    if (typeof fbq === 'function') {
+      fbq('track', 'Lead', {
+        content_name: 'WhatsApp Contact',
+        content_category: 'lead'
+      });
+    }
   });
 });
 
