@@ -89,25 +89,18 @@ function loadGA4(id) {
   gtag('config', id, { send_page_view: true });
 }
 
-// Meta Pixel já carregou no <head> em modo 'revoke' (queue pausada).
-// Aqui só damos grant/revoke após consent — Consent API oficial do Meta.
-function grantMetaConsent() {
-  if (typeof fbq === 'function') fbq('consent', 'grant');
-}
-
+// Meta Pixel dispara no <head> (PageView no load). GA4 carrega após consent.
 function applyConsent(state) {
   localStorage.setItem(LGPD_KEY, state);
   if (banner) banner.hidden = true;
   if (state === 'accepted') {
     loadGA4(cfg.gaId);
-    grantMetaConsent();
   }
 }
 
 const stored = localStorage.getItem(LGPD_KEY);
 if (stored === 'accepted') {
   loadGA4(cfg.gaId);
-  grantMetaConsent();
 } else if (stored !== 'rejected' && banner) {
   banner.hidden = false;
 }
