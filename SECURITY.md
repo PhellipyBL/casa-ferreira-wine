@@ -11,7 +11,7 @@ Se você identificou uma vulnerabilidade no site **casaferreirawine.com.br** ou 
 - Assunto: `[SEGURANÇA] Resumo curto da vulnerabilidade`
 
 **Canal alternativo (WhatsApp):**
-- [WhatsApp oficial](https://wa.me/5583921535737)
+- [WhatsApp oficial](https://wa.me/5583996790368)
 - Mencione "reporte de segurança" na primeira mensagem
 
 ## O que incluir no reporte
