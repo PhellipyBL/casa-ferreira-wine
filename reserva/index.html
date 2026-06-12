@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Reserva — Casa Ferreira Wine</title>
+  <meta name="robots" content="noindex" />
+  <meta property="og:title" content="Confirme sua presença — Casa Ferreira Wine" />
+  <meta property="og:description" content="Reserve seu lugar na experiência Casa Ferreira Wine: menu, alergias e transfer." />
+  <meta property="og:image" content="https://casaferreirawine.com.br/images/og-image.jpg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32.png" />
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; background: #F7F3EC; }
+    iframe { border: 0; width: 100%; height: 100%; display: block; }
+    .msg { font-family: 'Montserrat', system-ui, Arial, sans-serif; text-align: center; padding: 3.5rem 1.5rem; color: #5C1A1A; line-height: 1.7; }
+    .msg a { color: #B8965A; }
+  </style>
+</head>
+<body>
+  <div id="root" class="msg">Carregando reserva…</div>
+  <script>
+    var APP = 'https://script.google.com/macros/s/AKfycbxubAQmX2lLmZQFhQeZORppkfK9Xxylm7AOYhjXOJQO2gG5XsXT2RN6b1sCPK978a8h/exec';
+    var p = new URLSearchParams(location.search);
+    var d = p.get('d') || '';
+    var lang = p.get('lang') || '';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(d)) {
+      var src = APP + '?data=' + encodeURIComponent(d) + (lang ? '&lang=' + encodeURIComponent(lang) : '');
+      var f = document.createElement('iframe');
+      f.src = src;
+      f.setAttribute('allow', 'clipboard-write');
+      f.title = 'Reserva Casa Ferreira Wine';
+      var r = document.getElementById('root');
+      r.parentNode.replaceChild(f, r);
+    } else {
+      document.getElementById('root').innerHTML =
+        'Link incompleto. Use o link específico da data que você recebeu, ou fale com a gente no <a href="https://wa.me/5583996790368">WhatsApp oficial</a>.';
+    }
+  </script>
+</body>
+</html>
