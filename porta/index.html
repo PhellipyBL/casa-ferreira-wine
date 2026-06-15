@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>Check-in — Casa Ferreira Wine</title>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;background:#F7F3EC;color:#1C1C1C;padding-bottom:40px}
+    .hd{background:#3D0F0F;color:#F7F3EC;padding:14px;text-align:center;position:sticky;top:0;z-index:5}
+    .hd .b{font-family:Georgia,serif;letter-spacing:.12em;font-size:17px}
+    .hd .g{color:#D4B07A}
+    .hd .d{color:#D4B07A;font-size:12px;margin-top:4px;letter-spacing:.1em;text-transform:uppercase}
+    #reader{width:calc(100% - 24px);max-width:520px;margin:14px auto 6px;border-radius:10px;overflow:hidden}
+    .row{max-width:520px;margin:0 auto;padding:0 12px}
+    .mc{display:flex;gap:6px;margin:6px auto}
+    .mc input{flex:1;padding:12px;border:1px solid #ccc;border-radius:8px;font-size:16px}
+    .mc button{padding:12px 16px;border:none;border-radius:8px;background:#5C1A1A;color:#fff;font-weight:bold;font-size:15px}
+    .res{max-width:520px;margin:12px auto;padding:0 12px}
+    .rcard{padding:18px;border-radius:12px;text-align:center;font-weight:bold}
+    .rcard.ok{background:#F1F8E9;border:2px solid #2E7D32;color:#2E7D32}
+    .rcard.warn{background:#FFF8E1;border:2px solid #F9A825;color:#9a6a00}
+    .rcard.bad{background:#FFEBEE;border:2px solid #C62828;color:#C62828}
+    .rn{font-size:24px;color:#1C1C1C;margin:10px 0}
+    .rp{display:inline-block;color:#fff;padding:9px 20px;border-radius:22px;font-size:18px;margin:4px 0}
+    .ral{color:#C62828;margin-top:10px;font-size:15px}
+    .rs{color:#555;font-weight:normal;margin-top:8px;font-size:14px}
+    .hint{text-align:center;color:#9a8f86;font-size:12px;margin:8px 12px}
+    .err{text-align:center;color:#C62828;padding:30px 16px;font-weight:bold}
+  </style>
+</head>
+<body>
+  <div class="hd"><div class="b">CASA FERREIRA <span class="g">WINE</span></div><div class="d" id="sub">Check-in na entrada</div></div>
+  <div id="reader"></div>
+  <div class="row">
+    <div class="mc"><input id="mc" placeholder="ou digite o código (ex: CFW-044)" autocapitalize="characters" /><button onclick="manual()">OK</button></div>
+    <div class="hint">Aponte a câmera para o QR do convidado. Verde = entrada confirmada.</div>
+  </div>
+  <div class="res" id="res"></div>
+
+  <script>
+    var EXEC='https://script.google.com/macros/s/AKfycbzTjyZDFFjipI6Y7X33FKrsUUdtg2sHHDTM7CKy7f4u0_2NKcKuxkcXaGuzSZh3xNax/exec';
+    var EMO={vermelha:'🥩',branca:'🐟',vegetariano:'🥗'};
+    var NOMEPRATO={vermelha:'CARNE VERMELHA',branca:'CARNE BRANCA',vegetariano:'VEGETARIANO'};
+    var COR={vermelha:'#C62828',branca:'#1565C0',vegetariano:'#2E7D32'};
+    var p=new URLSearchParams(location.search);
+    var KEY=p.get('k')||localStorage.getItem('cfw_porta_k')||'';
+    if(p.get('k')) localStorage.setItem('cfw_porta_k', p.get('k'));
+    var DATA=p.get('d')||'';
+    if(DATA) document.getElementById('sub').textContent='Check-in · '+DATA;
+    function $(id){return document.getElementById(id);}
+    function esc(s){return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+    var lastCode='',lastT=0;
+
+    function jsonp(url,cb){
+      var name='cfwcb'+(Date.now())+Math.floor(Math.random()*1000);
+      var s=document.createElement('script');
+      var to=setTimeout(function(){ try{delete window[name];}catch(e){} if(s.parentNode)s.parentNode.removeChild(s); cb({ok:false,erro:'timeout'}); },8000);
+      window[name]=function(d){ clearTimeout(to); try{delete window[name];}catch(e){} if(s.parentNode)s.parentNode.removeChild(s); cb(d); };
+      s.src=url+'&callback='+name;
+      s.onerror=function(){ clearTimeout(to); if(s.parentNode)s.parentNode.removeChild(s); cb({ok:false,erro:'rede'}); };
+      document.body.appendChild(s);
+    }
+
+    function beep(ok){
+      try{ if(navigator.vibrate) navigator.vibrate(ok?120:[60,60,60]); }catch(e){}
+    }
+
+    function showCard(d){
+      var el=$('res');
+      if(!d||!d.ok){
+        var msg = d&&d.erro==='nao_encontrado' ? ('Código '+esc((d.codigo)||'')+' não encontrado') :
+                  d&&d.erro==='sem_permissao' ? 'Link sem permissão (abra pelo link com a chave)' :
+                  'Não foi possível validar. Tente de novo.';
+        el.innerHTML='<div class="rcard bad">❌ '+msg+'</div>'; beep(false); return;
+      }
+      beep(true);
+      var cls=d.jaPresente?'warn':'ok';
+      var topo=d.jaPresente?'⚠️ JÁ TINHA ENTRADO':'✅ ENTRADA CONFIRMADA';
+      var cor=COR[d.prato]||'#5C1A1A';
+      var chegada=d.transporte==='transfer'?('🚐 Transfer '+(d.horario||'')):'🚗 Carro próprio';
+      el.innerHTML='<div class="rcard '+cls+'">'+topo+
+        '<div class="rn">'+esc(d.nome)+'</div>'+
+        '<div class="rp" style="background:'+cor+'">'+(EMO[d.prato]||'')+' '+(NOMEPRATO[d.prato]||esc(d.prato))+'</div>'+
+        (d.alergia?'<div class="ral">⚠️ ALERGIA: '+esc(d.alergia)+'</div>':'')+
+        '<div class="rs">'+chegada+' · '+esc(d.codigo)+'</div></div>';
+    }
+
+    function valida(c){
+      c=(c||'').trim().toUpperCase();
+      if(!c) return;
+      if(!KEY){ $('res').innerHTML='<div class="rcard bad">Abra esta página pelo link com a chave (?k=...)</div>'; return; }
+      $('res').innerHTML='<div class="rcard" style="background:#fff;border:1px solid #eee;color:#5C1A1A">Validando '+esc(c)+'…</div>';
+      jsonp(EXEC+'?action=scan&c='+encodeURIComponent(c)+'&k='+encodeURIComponent(KEY), showCard);
+    }
+    function manual(){ var c=$('mc').value; $('mc').value=''; valida(c); }
+    $('mc').addEventListener('keydown',function(e){ if(e.key==='Enter') manual(); });
+
+    function onScan(txt){
+      var c=(txt||'').trim().toUpperCase();
+      var now=Date.now();
+      if(c===lastCode && now-lastT<3500) return;
+      lastCode=c; lastT=now;
+      valida(c);
+    }
+
+    if(!KEY){
+      $('reader').innerHTML='';
+      $('res').innerHTML='<div class="err">Abra esta página pelo link oficial (com a chave). Ex.: /porta/?k=SUACHAVE</div>';
+    } else {
+      var h5=new Html5Qrcode('reader');
+      h5.start({facingMode:'environment'},{fps:10,qrbox:{width:250,height:250}},onScan,function(){})
+        .catch(function(err){
+          $('reader').innerHTML='<div class="err">Não foi possível abrir a câmera.<br>Use o campo “digite o código” abaixo, ou permita o acesso à câmera e recarregue.</div>';
+        });
+    }
+  </script>
+</body>
+</html>
