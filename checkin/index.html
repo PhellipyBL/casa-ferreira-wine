@@ -18,10 +18,31 @@
   .reticle{ position:absolute; inset:12%; border:3px solid var(--ouro); border-radius:14px; box-shadow:0 0 0 9999px rgba(0,0,0,.32); pointer-events:none; }
   .msg{ text-align:center; font-size:17px; font-weight:600; min-height:54px; margin:16px 8px; line-height:1.4; }
   .msg.ok{ color:var(--verde); } .msg.warn{ color:var(--amarelo); } .msg.err{ color:var(--vermelho); }
-  .nome{ font-size:22px; font-weight:700; text-align:center; margin-top:4px; }
   .btn{ display:block; width:100%; padding:16px; border:none; border-radius:10px; background:var(--vinho); color:#fff; font-size:17px; font-weight:bold; margin-top:8px; }
   .hint{ text-align:center; font-size:12px; color:#9a8f86; margin:10px 12px; }
   .start{ display:flex; align-items:center; justify-content:center; gap:10px; }
+
+  /* Card de resultado (só fecha no OK) */
+  .res{ display:none; position:fixed; inset:0; z-index:60; background:var(--areia); flex-direction:column; }
+  .res.on{ display:flex; }
+  .res__top{ padding:22px 18px 16px; text-align:center; color:#fff; }
+  .res__top.ok{ background:var(--verde); } .res__top.warn{ background:var(--amarelo); color:#3D0F0F; } .res__top.err{ background:var(--vermelho); }
+  .res__icon{ font-size:46px; line-height:1; }
+  .res__status{ font-size:18px; font-weight:700; margin-top:6px; }
+  .res__hora{ font-size:13px; opacity:.9; margin-top:2px; }
+  .res__body{ flex:1; overflow:auto; padding:22px 20px; }
+  .res__nome{ font-size:30px; font-weight:800; text-align:center; line-height:1.15; }
+  .res__cod{ text-align:center; color:#9a8f86; font-size:13px; letter-spacing:.08em; margin-top:4px; }
+  .row{ display:flex; align-items:center; gap:14px; background:#fff; border-radius:12px; padding:16px; margin-top:14px; }
+  .row__ic{ font-size:30px; flex-shrink:0; }
+  .row__lb{ font-size:12px; color:#9a8f86; letter-spacing:.08em; text-transform:uppercase; }
+  .row__vl{ font-size:22px; font-weight:700; margin-top:2px; }
+  .row.sala{ border-left:5px solid var(--ouro); }
+  .row.prato{ border-left:5px solid var(--vinho); }
+  .row.alergia{ border-left:5px solid var(--vermelho); }
+  .row.alergia .row__vl{ color:var(--vermelho); }
+  .res__okwrap{ padding:14px 18px calc(14px + env(safe-area-inset-bottom)); background:var(--areia); }
+  .res__ok{ display:block; width:100%; padding:20px; border:none; border-radius:12px; background:var(--vinho); color:#fff; font-size:20px; font-weight:800; letter-spacing:.04em; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 </head>
@@ -33,9 +54,23 @@
   <div class="wrap">
     <div class="scanbox"><video id="vid" playsinline muted></video><div class="reticle"></div></div>
     <div class="msg" id="msg">Toque em iniciar para abrir a câmera</div>
-    <div class="nome" id="nome"></div>
     <button class="btn start" id="btn" onclick="start()">📷 Iniciar câmera</button>
-    <div class="hint">Aponte para o QR do e-ticket do convidado. A presença é marcada sozinha.</div>
+    <div class="hint">Aponte para o QR do e-ticket do convidado. Os dados aparecem na tela e a presença é marcada.</div>
+  </div>
+
+  <!-- Card de resultado: fica na tela até apertar OK -->
+  <div class="res" id="res">
+    <div class="res__top" id="resTop">
+      <div class="res__icon" id="resIcon">✓</div>
+      <div class="res__status" id="resStatus"></div>
+      <div class="res__hora" id="resHora"></div>
+    </div>
+    <div class="res__body">
+      <div class="res__nome" id="resNome"></div>
+      <div class="res__cod" id="resCod"></div>
+      <div id="resRows"></div>
+    </div>
+    <div class="res__okwrap"><button class="res__ok" onclick="okResult()">OK · próximo</button></div>
   </div>
 
 <script>
@@ -63,6 +98,7 @@
 
   function tick(){
     var v=$('vid');
+    if(busy){ return; } // pausado enquanto o card de resultado está aberto
     if(!v.videoWidth){ raf=requestAnimationFrame(tick); return; }
     if(detector){
       detector.detect(v).then(function(codes){ if(codes && codes.length) gotCode(codes[0].rawValue); }).catch(function(){});
@@ -93,8 +129,8 @@
     if(!p.cod){ return; } // ignora QR que não é da casa
     if(p.cod===lastCode && (now-lastT)<3000) return; // debounce
     lastCode=p.cod; lastT=now;
-    if(!p.tok){ setMsg(p.cod+' — QR sem token (e-ticket antigo?)','warn'); beep(440,120); return; }
-    busy=true;
+    busy=true; // pausa a leitura até o OK
+    if(!p.tok){ showResult({ok:false,erro:'token'}, p.cod); return; }
     setMsg('Registrando '+p.cod+'…','');
     mark(p.cod, p.tok);
   }
@@ -103,24 +139,48 @@
     var cb='cb'+Date.now();
     var s=document.createElement('script');
     var done=false;
-    window[cb]=function(res){ done=true; handleResult(res); cleanup(); };
-    function cleanup(){ try{ delete window[cb]; }catch(e){ window[cb]=undefined; } if(s.parentNode) s.parentNode.removeChild(s); busy=false; }
-    s.onerror=function(){ if(!done){ handleResult({ok:false,erro:'rede'}); cleanup(); } };
-    setTimeout(function(){ if(!done){ handleResult({ok:false,erro:'timeout'}); cleanup(); } }, 12000);
+    window[cb]=function(res){ done=true; showResult(res, cod); cleanup(); };
+    function cleanup(){ try{ delete window[cb]; }catch(e){ window[cb]=undefined; } if(s.parentNode) s.parentNode.removeChild(s); }
+    s.onerror=function(){ if(!done){ showResult({ok:false,erro:'rede'}, cod); cleanup(); } };
+    setTimeout(function(){ if(!done){ showResult({ok:false,erro:'timeout'}, cod); cleanup(); } }, 12000);
     s.src=EXEC+'?action=extmark&cod='+encodeURIComponent(cod)+'&tok='+encodeURIComponent(tok)+'&cb='+cb;
     document.body.appendChild(s);
   }
 
-  function handleResult(res){
-    $('nome').textContent = res && res.nome ? res.nome : '';
-    if(res && res.ok && res.ja){ setMsg('Já estava presente ('+(res.hora||'')+')','warn'); beep(440,90); }
-    else if(res && res.ok){ setMsg('✓ Presença registrada · '+(res.hora||''),'ok'); beep(680,140); }
-    else {
-      var e = res && res.erro;
-      var txt = e==='token' ? 'QR inválido' : e==='nao_encontrado' ? 'Reserva não encontrada' : e==='ocupado' ? 'Sistema ocupado, tente de novo' : e==='timeout' ? 'Sem resposta — tente de novo' : 'Falha de conexão';
-      setMsg('✗ '+txt,'err'); beep(180,200);
+  function row(cls, ic, lb, vl){
+    return '<div class="row '+cls+'"><div class="row__ic">'+ic+'</div><div><div class="row__lb">'+lb+'</div><div class="row__vl">'+vl+'</div></div></div>';
+  }
+
+  // Monta e exibe o card que SÓ sai no OK
+  function showResult(res, cod){
+    var top=$('resTop'), ok = res && res.ok;
+    var icon='✓', status='Presença registrada', cls='ok', f=680, d=140;
+    if(ok && res.ja){ icon='⚠️'; status='Já estava presente'; cls='warn'; f=440; d=90; }
+    else if(!ok){
+      cls='err'; icon='✗'; f=180; d=200;
+      var e=res && res.erro;
+      status = e==='token' ? 'QR inválido' : e==='nao_encontrado' ? 'Reserva não encontrada' : e==='ocupado' ? 'Sistema ocupado' : e==='timeout' ? 'Sem resposta — tente de novo' : 'Falha de conexão';
     }
-    setTimeout(function(){ setMsg('Aponte para o QR do convidado',''); $('nome').textContent=''; }, 2600);
+    top.className='res__top '+cls;
+    $('resIcon').textContent=icon;
+    $('resStatus').textContent=status;
+    $('resHora').textContent = (res && res.hora) ? ('às '+res.hora) : '';
+    $('resNome').textContent = (res && res.nome) ? res.nome : (cod||'');
+    $('resCod').textContent = cod || '';
+    var rows='';
+    if(res && res.sala)    rows+=row('sala','🎭','Sala', res.sala);
+    if(res && res.prato)   rows+=row('prato','🍽️','Vai comer', res.prato);
+    if(res && res.alergia) rows+=row('alergia','⚠️','Restrição / alergia', res.alergia);
+    $('resRows').innerHTML=rows;
+    $('res').className='res on';
+    beep(f,d);
+  }
+
+  function okResult(){
+    $('res').className='res';
+    busy=false;
+    setMsg('Aponte para o QR do convidado','');
+    tick(); // retoma a leitura
   }
 </script>
 </body>
