@@ -41,6 +41,8 @@
   .row.prato{ border-left:5px solid var(--vinho); }
   .row.alergia{ border-left:5px solid var(--vermelho); }
   .row.alergia .row__vl{ color:var(--vermelho); }
+  .bday{ display:none; margin:16px 0 2px; padding:16px; border-radius:14px; background:linear-gradient(135deg,#E7C98A,#C99A4E); color:#3D0F0F; text-align:center; font-size:21px; font-weight:800; letter-spacing:.02em; box-shadow:0 3px 14px rgba(0,0,0,.15); }
+  .bday.on{ display:block; }
   .res__okwrap{ padding:14px 18px calc(14px + env(safe-area-inset-bottom)); background:var(--areia); }
   .res__ok{ display:block; width:100%; padding:20px; border:none; border-radius:12px; background:var(--vinho); color:#fff; font-size:20px; font-weight:800; letter-spacing:.04em; }
 </style>
@@ -68,6 +70,7 @@
     <div class="res__body">
       <div class="res__nome" id="resNome"></div>
       <div class="res__cod" id="resCod"></div>
+      <div class="bday" id="resBday"></div>
       <div id="resRows"></div>
     </div>
     <div class="res__okwrap"><button class="res__ok" onclick="okResult()">OK · próximo</button></div>
@@ -167,6 +170,9 @@
     $('resHora').textContent = (res && res.hora) ? ('às '+res.hora) : '';
     $('resNome').textContent = (res && res.nome) ? res.nome : (cod||'');
     $('resCod').textContent = cod || '';
+    var bd=$('resBday');
+    if(res && res.aniversario){ bd.textContent='🎂 HOJE É ANIVERSÁRIO!'+(res.idade?' ('+res.idade+' anos)':''); bd.className='bday on'; if(res.ok){ beep(880,160); setTimeout(function(){beep(1040,200);},180);} }
+    else { bd.className='bday'; bd.textContent=''; }
     var rows='';
     if(res && res.sala)    rows+=row('sala','🎭','Sala', res.sala);
     if(res && res.prato)   rows+=row('prato','🍽️','Vai comer', res.prato);
