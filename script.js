@@ -129,8 +129,8 @@ function trackEvent(name, params = {}) {
   }
 }
 
-// Botões "Comprar Ingresso" — qualquer link pra smilein.com.br
-document.querySelectorAll('a[href*="smilein.com.br"]').forEach(a => {
+// Botões "Comprar Ingresso" — qualquer link pra sympla.com.br
+document.querySelectorAll('a[href*="sympla.com.br"]').forEach(a => {
   a.addEventListener('click', () => {
     trackEvent('comprar_ingresso_click', {
       location: a.closest('section,nav,footer')?.tagName?.toLowerCase() || 'unknown',
